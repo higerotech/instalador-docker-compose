@@ -133,6 +133,38 @@ El workflow además detecta los tags de hito documental: si el ref no contiene
 `install-docker.sh` —como `v0.1.0`, que es solo requisitos— emite un aviso y termina sin
 publicar artefacto, en vez de fallar.
 
+## Inmutabilidad de los tags: cómo está impuesta y qué cuesta
+
+ADR-0002 se apoya en que un tag publicado no se pueda reescribir. Eso dejó de ser una
+convención y pasa a estar impuesto por el ruleset `Protect-Tags`:
+
+| Elemento | Valor |
+|---|---|
+| Target | `tag`, sobre `refs/tags/v*` |
+| Reglas | `deletion`, `non_fast_forward`, `update` |
+| Actores con bypass | **ninguno** (`current_user_can_bypass: never`) |
+
+Verificado con dos pruebas no destructivas: el borrado se rechaza con *Cannot delete this tag* y
+un `--force` con *Cannot update this protected ref*. Crear tags nuevos sigue permitido, porque
+no se añadió la regla `creation` — de lo contrario no se podría publicar ninguna versión.
+
+**El coste de esto hay que conocerlo antes de necesitarlo.** Sin actores con bypass, *nadie*
+—tampoco el propietario— puede borrar ni mover un tag `v*`. Un tag empujado por error (al commit
+equivocado, o con un typo como `v0.20.0`) **es permanente**. Eso es exactamente lo que se
+pretendía, pero implica dos cosas:
+
+1. **La corrección de un tag erróneo no es borrarlo, es publicar el siguiente.** Si `v0.3.0`
+   apunta a un commit equivocado, se abandona y se publica `v0.3.1`. El tag muerto se documenta
+   en el `CHANGELOG.md` marcando la versión como `[YANKED]`, según Keep a Changelog.
+2. **Solo si es imprescindible**, el propietario puede poner el ruleset en `evaluate` o añadirse
+   como bypass temporalmente, corregir, y volver a `active` de inmediato. Debe quedar registrado
+   como excepción: es una desviación consciente de ADR-0002, no un procedimiento normal.
+
+```bash
+# Consultar el estado del ruleset
+gh api repos/higerotech/instalador-docker-compose/rulesets --jq '.[] | "\(.name)\t\(.target)\t\(.enforcement)"'
+```
+
 ## Reversión: qué se puede y qué no
 
 | Situación | Acción | Reversible |
