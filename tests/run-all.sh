@@ -10,14 +10,19 @@
 # Uso: bash tests/run-all.sh
 #===============================================================================
 
-# SC2329 (función nunca invocada): las funciones stage_* se invocan indirectamente, pasando su
-# nombre a run_stage, que las ejecuta con "$@". ShellCheck no resuelve esa indirección.
-# shellcheck disable=SC2329
+# Las funciones stage_* se invocan indirectamente: su nombre se pasa a run_stage, que las
+# ejecuta con "$@". ShellCheck no resuelve esa indirección y lo señala con dos códigos
+# distintos según la versión — SC2329 desde 0.11 y SC2317 en versiones anteriores — así que se
+# desactivan ambos para que el análisis dé el mismo resultado en cualquier entorno.
+# shellcheck disable=SC2329,SC2317
 
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT" || exit 1
+
+# Debe coincidir con SHELLCHECK_VERSION de .github/workflows/ci.yml.
+SHELLCHECK_VERSION="v0.11.0"
 
 export MSYS_NO_PATHCONV=1
 if command -v cygpath >/dev/null 2>&1; then
@@ -41,7 +46,9 @@ run_stage() {
 }
 
 stage_shellcheck() {
-    docker run --rm -v "${MOUNT_SRC}:/work" -w /work koalaman/shellcheck:stable \
+    # Versión fijada: la de ubuntu-latest difiere y emite códigos distintos para el mismo
+    # hallazgo, lo que produce verde en local y rojo en CI. CI usa esta misma imagen.
+    docker run --rm -v "${MOUNT_SRC}:/work" -w /work "koalaman/shellcheck:${SHELLCHECK_VERSION}" \
         install-docker.sh tests/dry-run-matrix.sh tests/hardening-merge.sh tests/run-all.sh
 }
 

@@ -19,10 +19,17 @@ jobs:
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-latest
+    env:
+      # Versión fijada, la misma que usa tests/run-all.sh en local. El shellcheck
+      # preinstalado en ubuntu-latest es de otra versión y emite códigos distintos para el
+      # mismo hallazgo (SC2317 frente a SC2329), lo que daba verde en local y rojo en CI.
+      SHELLCHECK_VERSION: "v0.11.0"
     steps:
       - uses: actions/checkout@v4
-      - name: shellcheck (preinstalado en ubuntu-latest)
-        run: shellcheck install-docker.sh tests/dry-run-matrix.sh tests/hardening-merge.sh tests/run-all.sh
+      - name: shellcheck (versión fijada, idéntica a la local)
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work "koalaman/shellcheck:${SHELLCHECK_VERSION}" \
+            install-docker.sh tests/dry-run-matrix.sh tests/hardening-merge.sh tests/run-all.sh
 
   docs-mermaid:
     name: Validación de diagramas Mermaid

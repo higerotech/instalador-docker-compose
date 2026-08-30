@@ -22,6 +22,14 @@ rama y tags en GitHub.
 - Sección de licencia en el `README.md` (GPL-3.0, heredada del commit inicial del repositorio)
   con la implicación práctica para quien redistribuya una versión modificada.
 
+### Corregido
+
+- **ShellCheck fijado a `v0.11.0` en CI y en local.** El binario preinstalado en
+  `ubuntu-latest` es de otra versión y señala el mismo hallazgo con un código distinto
+  (`SC2317` en lugar de `SC2329`), lo que producía verde en local y rojo en CI. Ahora ambos
+  ejecutan la misma imagen y `tests/run-all.sh` desactiva los dos códigos, verificado contra
+  las versiones 0.9.0 y 0.11.0.
+
 ## [0.2.0] - 2026-08-30
 
 Cierre del **Gate 1 — Design**, e implementación del instalador.
