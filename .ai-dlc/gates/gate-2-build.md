@@ -29,8 +29,8 @@ Cierre de la Fase 03. Marcar solo lo fundamentado (Human-in-the-Loop).
 
 - [x] gitleaks pinneado por versión y sha256 del tarball
 - [x] `.gitattributes` fuerza LF en `*.sh` (un CRLF rompe el shebang en el host)
-- [ ] **Protección de rama `main`** activada en GitHub — sin esto ADR-0002 no se sostiene
-- [ ] **Protección de tags `v*`** activada (no reescribibles)
+- [x] **Protección de rama `main`** activada en GitHub (ruleset `Protect-Main`) — ADR-0002
+- [x] **Protección de tags `v*`** activada (ruleset `Protect-Tags`: no reescribibles ni borrables)
 - [ ] logrotate de la bitácora desplegado (90 días, según `data-classification.md`)
 
 ## Decisiones pendientes de validación humana

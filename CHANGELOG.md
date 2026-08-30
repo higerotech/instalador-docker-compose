@@ -29,6 +29,15 @@ rama y tags en GitHub.
   checkout del contenido del tag sin tocarlo, y los tags de hito documental sin instalador
   terminan con aviso en lugar de fallar.
 
+### Seguridad
+
+- **Inmutabilidad de los tags impuesta por configuración**, no solo por convención: ruleset
+  `Protect-Tags` sobre `refs/tags/v*` con `deletion`, `non_fast_forward` y `update`, sin actores
+  con bypass. Es el control que faltaba para que la mitigación de T2 de ADR-0002 fuera real.
+  Verificado con pruebas no destructivas: borrado y `--force` rechazados. Documentado en
+  `docs/05-deployment/deployment.md` el coste operativo: un tag erróneo es permanente y se
+  corrige publicando el siguiente, no borrándolo.
+
 ### Corregido
 
 - **ShellCheck fijado a `v0.11.0` en CI y en local.** El binario preinstalado en
