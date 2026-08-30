@@ -22,6 +22,13 @@ rama y tags en GitHub.
 - Sección de licencia en el `README.md` (GPL-3.0, heredada del commit inicial del repositorio)
   con la implicación práctica para quien redistribuya una versión modificada.
 
+- **`release.yml` admite disparo manual** (`workflow_dispatch`) con el tag como entrada:
+  `gh workflow run release.yml --ref main -f tag=v0.2.0`. Necesario porque GitHub no registra
+  un workflow hasta que llega a la rama por defecto, de modo que un tag empujado antes nunca
+  dispara su release; reescribir el tag para forzarlo violaría ADR-0002. El workflow hace
+  checkout del contenido del tag sin tocarlo, y los tags de hito documental sin instalador
+  terminan con aviso en lugar de fallar.
+
 ### Corregido
 
 - **ShellCheck fijado a `v0.11.0` en CI y en local.** El binario preinstalado en

@@ -112,6 +112,27 @@ flowchart TD
 descargable. La rama de reversión termina en la regla que sostiene ADR-0002 — un tag publicado
 no se reescribe jamás; se publica uno nuevo.*
 
+## Publicar una release sin mover el tag
+
+GitHub **no registra un workflow hasta que llega a la rama por defecto**. Un tag empujado antes
+de ese momento no dispara nunca su release, y es exactamente lo que ocurrió con `v0.2.0`. La
+salida evidente —borrar el tag y volver a empujarlo— es justo lo que ADR-0002 prohíbe: un tag
+publicado no se reescribe.
+
+Por eso `release.yml` acepta disparo manual con el tag como entrada:
+
+```bash
+gh workflow run release.yml --ref main -f tag=v0.2.0
+```
+
+Se lanza **desde la rama por defecto** (de ahí sale la lógica del workflow, que es la única
+versión que tiene `workflow_dispatch`) y hace checkout del **contenido del tag**, que es lo que
+se publica y sobre lo que se calcula el `SHA256SUMS`. El tag no se toca.
+
+El workflow además detecta los tags de hito documental: si el ref no contiene
+`install-docker.sh` —como `v0.1.0`, que es solo requisitos— emite un aviso y termina sin
+publicar artefacto, en vez de fallar.
+
 ## Reversión: qué se puede y qué no
 
 | Situación | Acción | Reversible |
@@ -161,6 +182,8 @@ manifiestan de inmediato, sino tras acumular actividad.*
 - [ ] **Protección de tags `v*`** activada (no se pueden reescribir ni borrar).
 - [ ] Workflow `release.yml` ejecutado con éxito al menos una vez.
 - [ ] `SHA256SUMS` publicado y verificado manualmente por un operador distinto del que publicó.
+- [x] Disparo manual (`workflow_dispatch`) disponible para publicar un tag existente sin
+      reescribirlo, y salida limpia en tags de hito documental sin instalador.
 - [ ] Runbook validado ejecutándolo paso a paso en un host real.
 - [ ] Ruta de reversión probada: restaurar `daemon.json` desde `.bak` en un host de pruebas.
 - [ ] Inventario de la flota con versión de instalador y de Docker por host.

@@ -9,6 +9,8 @@ Detalle en `docs/05-deployment/deployment.md`.
 - [x] Pipeline de publicación diseñado con siete puertas previas a que el artefacto sea descargable
 - [x] `release.yml` valida tag ↔ `SCRIPT_VERSION` ↔ entrada en `CHANGELOG.md`
 - [x] `SHA256SUMS` generado y publicado automáticamente con cada release
+- [x] `workflow_dispatch` con el tag como entrada: permite publicar un tag ya existente sin reescribirlo (ADR-0002)
+- [x] Los tags de hito documental sin instalador terminan con aviso, no con fallo
 - [x] Diagrama C4 Deployment de la topología completa
 - [x] Ruta de reversión documentada, con la lista explícita de lo que **no** es reversible
 - [ ] Workflow `release.yml` ejecutado con éxito al menos una vez
