@@ -31,7 +31,7 @@ Tres decisiones acopladas:
    Además hace gratuito e ilimitado GitHub Actions (ver ADR-0009).
 
 2. **La URL canónica apunta a un tag inmutable**, nunca a `main`:
-   `…/instalador-docker-compose/v0.2.0/install-docker.sh`. `main` se documenta explícitamente
+   `…/instalador-docker-compose/v1.0.0/install-docker.sh`. `main` se documenta explícitamente
    como "solo para pruebas". Un commit malicioso en `main` no alcanza a quien sigue las
    instrucciones publicadas.
 

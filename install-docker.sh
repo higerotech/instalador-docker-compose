@@ -10,11 +10,11 @@
 #   sudo bash install-docker.sh [opciones]
 #
 # Uso remoto (versión inmutable — RECOMENDADO):
-#   curl -fsSL https://raw.githubusercontent.com/higerotech/instalador-docker-compose/v0.2.0/install-docker.sh \
+#   curl -fsSL https://raw.githubusercontent.com/higerotech/instalador-docker-compose/v1.0.0/install-docker.sh \
 #     | sudo bash -s -- --docker-group "$USER"
 #
 # Uso remoto con verificación de integridad (máxima garantía — ADR-0002):
-#   V=v0.2.0; B=https://github.com/higerotech/instalador-docker-compose/releases/download/$V
+#   V=v1.0.0; B=https://github.com/higerotech/instalador-docker-compose/releases/download/$V
 #   curl -fsSLO "$B/install-docker.sh" && curl -fsSLO "$B/SHA256SUMS"
 #   sha256sum -c SHA256SUMS && sudo bash install-docker.sh
 #
@@ -26,7 +26,7 @@
 set -euo pipefail
 
 readonly SCRIPT_NAME="install-docker.sh"
-readonly SCRIPT_VERSION="0.2.0"
+readonly SCRIPT_VERSION="1.0.0"
 
 # Fingerprint de la llave "Docker Release (CE deb) <docker@docker.com>" (RS01/T3).
 # Verificado el 2026-08-30 descargando la llave desde download.docker.com y ejecutando

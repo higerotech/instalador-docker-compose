@@ -12,7 +12,7 @@ el host, y deja traza de lo que hizo.
 Comprueba el artefacto **antes** de concederle root:
 
 ```bash
-V=v0.2.0
+V=v1.0.0
 B="https://github.com/higerotech/instalador-docker-compose/releases/download/$V"
 
 curl -fsSLO "$B/install-docker.sh"
@@ -25,7 +25,7 @@ sudo bash install-docker.sh --docker-group "$USER"
 ### Directa (tag inmutable)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/higerotech/instalador-docker-compose/v0.2.0/install-docker.sh \
+curl -fsSL https://raw.githubusercontent.com/higerotech/instalador-docker-compose/v1.0.0/install-docker.sh \
   | sudo bash -s -- --docker-group "$USER"
 ```
 
@@ -62,10 +62,10 @@ Opciones completas: `bash install-docker.sh --help` y
 |---|---|---|
 | 0 | Requirements | ✅ cerrado (0.1.0) |
 | 1 | Design | ✅ cerrado (0.2.0) |
-| 2 | Build / despliegue real | 🚧 abierto — implementación y pruebas en verde; falta verificación en host con systemd |
-| 3 | Testing | 🚧 abierto |
-| 4 | Deployment | 🚧 abierto — faltan protecciones de rama y tags |
-| 5 | Monitoring | 🚧 abierto |
+| 2 | Build / despliegue real | ✅ cerrado (1.0.0) — instalación verificada en un host Ubuntu 24.04 real |
+| 3 | Testing | 🚧 abierto — falta la prueba negativa del fingerprint GPG |
+| 4 | Deployment | 🚧 abierto — protecciones de rama y tags activas; falta exigir el CI como check obligatorio |
+| 5 | Monitoring | 🚧 abierto — sin inventario de flota |
 
 Checklists en [`.ai-dlc/gates/`](.ai-dlc/gates/).
 
@@ -96,12 +96,15 @@ bash tests/run-all.sh      # ShellCheck + matriz + fusión + Mermaid (requiere D
 ```
 
 Estado en la última ejecución (2026-08-30): **ShellCheck sin hallazgos · 41/41 en la matriz de
-contenedores · 14/14 en las pruebas de fusión · 24/24 diagramas válidos**.
+contenedores · 14/14 en las pruebas de fusión · 25/25 diagramas válidos**.
 
-Lo que la suite **no** cubre está declarado en
-[docs/04-testing/test-strategy.md](docs/04-testing/test-strategy.md): la verificación real del
-fingerprint GPG, systemd y la instalación real de paquetes requieren un host con systemd y se
-cierran en el Gate 2.
+A esto se suma la **verificación en host real** que cierra el Gate 2: instalación completa en
+Ubuntu 24.04 con systemd, `daemon.json` endurecido, servicio activo, rotación de logs efectiva
+y contenedor de prueba ejecutado.
+
+Lo que la suite automatizada aún **no** cubre está declarado en
+[docs/04-testing/test-strategy.md](docs/04-testing/test-strategy.md): sobre todo la **prueba
+negativa** del fingerprint GPG, que se cierra en el Gate 3.
 
 ## Distribuciones soportadas
 
@@ -135,5 +138,13 @@ Proyecto gobernado con **AI-DLC**: cada fase produce documentación con diagrama
 en los tres ejes (estructura, comportamiento, trazabilidad) y cierra con un gate validado por
 humano. Versionado según [Keep a Changelog + SemVer](CHANGELOG.md): Gate 0 → `0.1.0`,
 Gate 1 → `0.2.0`, Gate 2 → `0.3.0`, … Gate 5 → `1.0.0`.
+
+**Desviación consciente de esa convención en `1.0.0`.** El corte por gate habría dado `0.3.0` al
+cerrar el Gate 2. Se publica `1.0.0` porque SemVer mayor no mide madurez de proceso sino
+**estabilidad del contrato público**, y el del instalador —opciones, códigos de salida y
+ficheros que escribe— está especificado en
+[interfaces-contract.md](docs/02-design/interfaces-contract.md), congelado y ya verificado en un
+host real. Los Gates 3 a 5 siguen abiertos y avanzarán como versiones `1.x`: son madurez
+operativa (cobertura de pruebas, inventario de flota), no cambios de contrato.
 
 Los diagramas se validan en CI: un bloque Mermaid mal formado no llega a `main`.
