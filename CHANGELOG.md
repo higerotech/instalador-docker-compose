@@ -18,6 +18,23 @@ avanzan como versiones `1.x`.
 Pendiente para el Gate 3: prueba negativa del fingerprint GPG, cobertura del resto de la matriz
 de distribuciones en host real, prueba de convergencia y verificación del aviso de UFW.
 
+### Seguridad
+
+- **RS01 / T3 verificado en producción.** La bitácora del host Ubuntu 24.04 registra
+  `2026-08-30T21:50:24Z [INFO] Fingerprint verificado: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88`.
+  Contrastado contra la constante `DOCKER_GPG_FPR` de `v1.0.0` y contra la llave viva de
+  `download.docker.com`: los tres coinciden. El control de cadena de suministro más importante
+  del instalador deja de estar solo revisado y pasa a estar demostrado en un host real. Queda la
+  prueba **negativa** (que una llave no coincidente produzca código 4) para el Gate 3.
+
+### Cambiado
+
+- Gate 2 cerrado **sin reservas**; trazabilidad de T3 y T11 actualizada en el threat model y
+  brechas de `test-strategy.md` reclasificadas al Gate 3.
+- Gate 4: marcado el `release.yml` ejecutado con éxito (`v1.0.0`) y la cadena artefacto ↔ tag ↔
+  checksum verificada end-to-end. Sigue abierta la verificación por un **segundo operador**,
+  que por definición no puede hacer quien publicó.
+
 ## [1.0.0] - 2026-08-30
 
 Cierre del **Gate 2 — Build**, con el instalador verificado en un host real. Primer release
