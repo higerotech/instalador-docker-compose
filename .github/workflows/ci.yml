@@ -29,7 +29,8 @@ jobs:
       - name: shellcheck (versión fijada, idéntica a la local)
         run: |
           docker run --rm -v "$PWD:/work" -w /work "koalaman/shellcheck:${SHELLCHECK_VERSION}" \
-            install-docker.sh tests/dry-run-matrix.sh tests/hardening-merge.sh tests/run-all.sh
+            install-docker.sh tests/dry-run-matrix.sh tests/hardening-merge.sh \
+            tests/gpg-integrity.sh tests/install-real.sh tests/run-all.sh
 
   docs-mermaid:
     name: Validación de diagramas Mermaid
@@ -62,6 +63,26 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/work" -w /work python:3.12-slim \
             bash tests/hardening-merge.sh
+
+  gpg-integrity:
+    name: Integridad GPG (prueba negativa + rollback)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Origen suplantado y verificación del rechazo
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work debian:12 \
+            bash tests/gpg-integrity.sh
+
+  install-real:
+    name: Instalación real y convergencia
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalación completa desde el repositorio oficial
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work debian:12 \
+            bash tests/install-real.sh
 
   secret-scan:
     name: Escaneo de secretos

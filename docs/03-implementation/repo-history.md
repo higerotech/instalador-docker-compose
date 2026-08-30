@@ -97,3 +97,7 @@ en una línea concreta. Un refactor descuidado las elimina sin que ninguna prueb
 3. **`rollback_apt_state` solo retira lo que la ejecución actual creó**, según las banderas
    `SOURCES_CREATED` y `KEYRING_CREATED`. Retirar incondicionalmente destruiría configuración
    legítima al re-ejecutar (ADR-0008).
+4. **La `E` de `set -eEuo pipefail` es funcional, no estilística.** Sin ella bash no hereda la
+   trampa `ERR` dentro de funciones y `on_error` no se ejecuta nunca, con lo que el rollback del
+   punto 3 queda desactivado en silencio. Fue un defecto real hasta 1.0.1; quitarla no rompe
+   ninguna prueba de camino feliz, solo `tests/gpg-integrity.sh`.
