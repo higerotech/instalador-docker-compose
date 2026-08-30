@@ -158,9 +158,9 @@ automatizada. Ninguna queda solo documentada.
 | T8 | Fusión no destructiva + backup | `apply_hardening` | `hardening-merge.sh`: 6 aserciones, incluida la de JSON corrupto |
 | T4 | `main "$@"` al final | Estructura del fichero | Revisión en PR + `bash -n`; ShellCheck en CI |
 | T10 | Rollback del estado APT | `on_error`, `rollback_apt_state` | `dry-run-matrix.sh`: distro no soportada devuelve exit 3 sin tocar el host |
-| T3 | Pin de fingerprint | `install_gpg_key` | Verificación real en Gate 2 (se omite en `--dry-run`) |
+| T3 | Pin de fingerprint | `install_gpg_key` | **Verificado en host real (2026-08-30)**: la bitácora registra `Fingerprint verificado: 9DC8…CD88`, coincidente con el pin y con la llave viva. Falta la prueba negativa (Gate 3) |
 | T9 | Pin de versión | `resolve_version_string` | `<TODO>` prueba de pin en Gate 3 |
-| T11 | Bitácora | `_log_line` | `<TODO>` aserción de bitácora en Gate 2 |
+| T11 | Bitácora | `_log_line` | Formato evidenciado en host real (UTC ISO 8601 + nivel). Falta la aserción automatizada (Gate 3) |
 
 ### Riesgos aceptados de forma explícita
 

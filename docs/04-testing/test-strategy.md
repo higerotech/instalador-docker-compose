@@ -202,10 +202,10 @@ Se declaran de forma explícita porque un gate no se cierra ocultando lo que fal
 
 | Brecha | Impacto | Cómo se cierra | Gate |
 |---|---|---|---|
-| La verificación real del fingerprint GPG (RS01/T3) no se ejerce: `--dry-run` la omite | El control de seguridad más importante solo está revisado, no probado | Instalación real en VM + prueba negativa con una llave falsa servida localmente | 2 → 3 |
+| ~~El fingerprint GPG no se ejerce nunca~~ → **cerrado en host real (2026-08-30)**. Queda la **prueba negativa**: una llave que no coincida debe dar exit 4 | El camino positivo está demostrado; el negativo, que es el que prueba que el control *rechaza*, no | Servir una llave falsa desde un origen local y comprobar exit 4 con el host intacto | 3 |
 | systemd no se ejercita (enable, restart, `is-active`) | Los contenedores no lo ejecutan | Instalación real; opcionalmente imágenes con systemd o VM efímera en CI | 2 |
 | La instalación real de paquetes no se prueba | El camino feliz principal | Instalación real en Debian 12 y 13 | 2 |
-| Sin aserción sobre la bitácora (A09/T11) | No se verifica que se registre lo que se dice registrar | Añadir aserción en la instalación real: la bitácora contiene START, el fingerprint y END | 2 |
+| Sin aserción **automatizada** sobre la bitácora (A09/T11) | El formato ya está evidenciado en host real, pero nada impide que un refactor lo rompa sin que falle ninguna prueba | Aserción en la suite: la bitácora contiene START, el fingerprint verificado y END | 3 |
 | `--docker-version` (pin) sin prueba | T9 mitigada pero no verificada | Prueba con una versión antigua conocida en VM | 3 |
 | `--userns-remap` solo validado como JSON | Marcado experimental en el contrato | Prueba en VM antes de promoverlo a estable | 3 |
 | Aviso de UFW sin prueba | T6, score 8.2 | VM con UFW activo; comprobar que aparece el aviso | 2 |
