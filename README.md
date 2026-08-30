@@ -73,6 +73,7 @@ Checklists en [`.ai-dlc/gates/`](.ai-dlc/gates/).
 
 ```
 install-docker.sh       el instalador (fichero único, es el producto)
+LICENSE                 GPL-3.0
 .ai-dlc/                gates (checklists HITL) y plantillas de artefactos
 .github/workflows/      ci.yml (5 tareas) y release.yml (publica con SHA256SUMS)
 docs/
@@ -118,6 +119,15 @@ Verificado en `docs.docker.com` el 2026-08-30. Derivados (Raspberry Pi OS, LMDE,
 - Cualquier secreto, `.env`, clave o certificado. El repositorio es público
   ([ADR-0002](docs/00-project/adr/0002-distribucion-tag-inmutable-y-checksum.md)) y gitleaks lo
   verifica en cada push.
+
+## Licencia
+
+[GNU General Public License v3.0](LICENSE).
+
+Implicación práctica para quien lo reutilice: si distribuyes una versión modificada de
+`install-docker.sh` —dentro de una imagen, un repositorio interno o un producto—, debes
+publicar el código modificado bajo la misma licencia. Usarlo tal cual para aprovisionar tus
+propios servidores no impone ninguna obligación.
 
 ## Metodología
 

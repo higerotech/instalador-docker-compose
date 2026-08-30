@@ -11,7 +11,7 @@ Cierre de la Fase 03. Marcar solo lo fundamentado (Human-in-the-Loop).
 - [x] CI con cinco tareas: ShellCheck, Mermaid, matriz en contenedores (incluida distro no soportada), fusión de daemon.json y gitleaks
 - [x] Workflow de release que valida tag ↔ `SCRIPT_VERSION` ↔ `CHANGELOG.md` antes de publicar
 - [x] Runbook de instalación y operación — `docs/03-implementation/deployment-runbook.md`
-- [ ] `repo-history.md` regenerado desde el historial real tras el primer commit y tag
+- [x] `repo-history.md` regenerado desde el historial real tras el primer commit y tag (`v0.1.0` = `465801f`, `v0.2.0` = `f674f5f`)
 
 ## Despliegue real en host destino (pendiente — requiere VM)
 

@@ -14,6 +14,14 @@ Pendiente para `0.3.0` (cierre del Gate 2): verificación en host real con syste
 negativa del fingerprint GPG, aserción sobre la bitácora, y activación de las protecciones de
 rama y tags en GitHub.
 
+### Añadido
+
+- `docs/03-implementation/repo-history.md` regenerado desde el historial real con
+  `scripts/gitgraph_from_log.py`: `gitGraph` derivado, bitácora fiel de commits y tabla de
+  trazabilidad tag ↔ commit ↔ versión ↔ gate. Cierra el ítem correspondiente del Gate 2.
+- Sección de licencia en el `README.md` (GPL-3.0, heredada del commit inicial del repositorio)
+  con la implicación práctica para quien redistribuya una versión modificada.
+
 ## [0.2.0] - 2026-08-30
 
 Cierre del **Gate 1 — Design**, e implementación del instalador.
