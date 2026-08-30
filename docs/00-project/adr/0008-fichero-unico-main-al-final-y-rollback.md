@@ -82,6 +82,19 @@ La garantía resultante está codificada en el contrato de interfaces: **los có
   - **La garantía es frágil ante el mantenimiento**: basta con que alguien añada una línea
     ejecutable fuera de una función para perderla. Se protege con revisión en PR y se
     documenta aquí como invariante del proyecto.
+
+  > **Nota de implementación (añadida en 1.0.1).** Esta fragilidad se materializó, y de una
+  > forma que esta ADR no había anticipado. El mecanismo 2 (rollback) **no funcionó desde el
+  > principio**: el script usaba `set -euo pipefail` sin la `E`, y bash no hereda la trampa
+  > `ERR` dentro de funciones salvo con `-E` (`errtrace`). Como el mecanismo 1 de esta misma
+  > ADR mete *todo* el código en funciones, el mecanismo 1 desactivaba silenciosamente al 2.
+  >
+  > Los dos mecanismos de esta decisión interactuaban, y nadie lo vio hasta que la prueba
+  > negativa del Gate 3 provocó un fallo después de escribir en el host. Corregido con
+  > `set -eEuo pipefail` y cubierto por `tests/gpg-integrity.sh`.
+  >
+  > Vale como recordatorio de que una ADR describe una decisión, no garantiza su
+  > implementación: eso lo garantiza una prueba que recorra la ruta.
   - El rollback no cubre lo ocurrido *después* de instalar paquetes: si `apt-get install`
     tiene éxito y falla el endurecimiento, Docker queda instalado. Es correcto — desinstalar
     Docker automáticamente sería más destructivo que dejarlo.

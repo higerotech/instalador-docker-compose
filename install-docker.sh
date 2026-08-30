@@ -23,10 +23,15 @@
 # a mitad, bash no ejecuta un script incompleto: nunca llega a invocar main.
 #===============================================================================
 
-set -euo pipefail
+# La `E` no es decorativa: sin ella bash NO hereda la trampa ERR dentro de las
+# funciones, y como todo el cuerpo de este script vive en funciones (ADR-0008),
+# `on_error` nunca llegaba a ejecutarse. El script salía por errexit sin revertir
+# nada y dejaba un docker.sources roto que inutilizaba apt-get en el host (T10).
+# Regresión cubierta por tests/gpg-integrity.sh.
+set -eEuo pipefail
 
 readonly SCRIPT_NAME="install-docker.sh"
-readonly SCRIPT_VERSION="1.0.0"
+readonly SCRIPT_VERSION="1.0.1"
 
 # Fingerprint de la llave "Docker Release (CE deb) <docker@docker.com>" (RS01/T3).
 # Verificado el 2026-08-30 descargando la llave desde download.docker.com y ejecutando
