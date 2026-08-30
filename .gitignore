@@ -1,0 +1,30 @@
+# Este repositorio NO debe contener secretos ni artefactos generados.
+
+# Artefactos de release (los genera el workflow, no se versionan)
+SHA256SUMS
+*.tar.gz
+
+# Secretos y credenciales — nunca en el repo
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.ppk
+credentials*.json
+
+# Salidas locales de pruebas
+/tmp/
+*.log
+daemon.json.bak.*
+
+# SO / editor / toolchain
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+
+# Ajustes locales de herramientas (no dependemos del gitignore global de cada equipo)
+.claude/settings.local.json
