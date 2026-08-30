@@ -1,0 +1,9 @@
+# Configuración de gitleaks para el escaneo de secretos en CI.
+#
+# Ruleset por defecto sin allowlists: este repositorio es un instalador público y
+# no debe contener secretos de ningún tipo. La decisión de mantenerlo público
+# (ADR-0002) hace que cualquier credencial filtrada sea inmediatamente pública.
+title = "instalador-docker-compose gitleaks"
+
+[extend]
+useDefault = true

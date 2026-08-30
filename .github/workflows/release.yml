@@ -1,0 +1,121 @@
+name: Release
+
+# Publica el artefacto inmutable del instalador (ADR-0002). El SHA256SUMS publicado es el
+# ancla de integridad que el operador puede verificar antes de ejecutar el script como root.
+#
+# Dos formas de disparo:
+#
+#   1. Automática, al empujar un tag SemVer.
+#
+#   2. Manual (workflow_dispatch), indicando el tag a publicar. Existe porque GitHub no
+#      registra un workflow hasta que llega a la rama por defecto: un tag empujado antes de
+#      ese momento nunca dispara su release, y volver a mover el tag para forzarlo violaría
+#      la inmutabilidad en la que se apoya ADR-0002. El disparo manual publica desde el tag
+#      existente sin tocarlo.
+#
+#      Lánzalo SIEMPRE desde la rama por defecto, indicando el tag como entrada:
+#          gh workflow run release.yml --ref main -f tag=v0.2.0
+#      El workflow se ejecuta con la lógica de `main` pero hace checkout del contenido del
+#      tag, que es lo que se publica y sobre lo que se calcula el checksum.
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag a publicar (debe existir ya, p. ej. v0.2.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publicar release verificable
+    runs-on: ubuntu-latest
+    env:
+      # En push, el tag que disparó el workflow; en disparo manual, el indicado como entrada.
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Checkout del contenido del tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+
+      - name: ¿Este tag contiene el instalador?
+        id: guard
+        run: |
+          set -euo pipefail
+          if [ -f install-docker.sh ]; then
+            echo "publicable=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publicable=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::${TAG} es un tag de hito documental: no contiene install-docker.sh y no publica artefacto."
+          fi
+
+      - name: ShellCheck (puerta previa a publicar)
+        if: steps.guard.outputs.publicable == 'true'
+        env:
+          SHELLCHECK_VERSION: "v0.11.0"
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work "koalaman/shellcheck:${SHELLCHECK_VERSION}" \
+            install-docker.sh
+
+      - name: La versión del script debe coincidir con el tag
+        if: steps.guard.outputs.publicable == 'true'
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          SCRIPT_VERSION="$(bash install-docker.sh --version | awk '{print $2}')"
+          echo "tag=${VERSION} script=${SCRIPT_VERSION}"
+          if [ "$VERSION" != "$SCRIPT_VERSION" ]; then
+            echo "::error::El tag ${TAG} no coincide con SCRIPT_VERSION=${SCRIPT_VERSION} en install-docker.sh"
+            exit 1
+          fi
+
+      - name: El CHANGELOG debe tener una entrada para la versión
+        if: steps.guard.outputs.publicable == 'true'
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          grep -q "^## \[${VERSION}\]" CHANGELOG.md || {
+            echo "::error::Falta la sección [## ${VERSION}] en CHANGELOG.md"
+            exit 1
+          }
+
+      - name: Generar SHA256SUMS
+        if: steps.guard.outputs.publicable == 'true'
+        run: |
+          set -euo pipefail
+          sha256sum install-docker.sh > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Publicar release con el artefacto y su checksum
+        if: steps.guard.outputs.publicable == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: ${{ env.TAG }}
+          files: |
+            install-docker.sh
+            SHA256SUMS
+          body: |
+            Instalador gobernado de Docker Engine + Compose — `${{ env.TAG }}`
+
+            **Instalación verificada (recomendada):**
+            ```bash
+            V=${{ env.TAG }}
+            B=https://github.com/${{ github.repository }}/releases/download/$V
+            curl -fsSLO "$B/install-docker.sh" && curl -fsSLO "$B/SHA256SUMS"
+            sha256sum -c SHA256SUMS && sudo bash install-docker.sh
+            ```
+
+            **Instalación directa (tag inmutable):**
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/${{ env.TAG }}/install-docker.sh | sudo bash
+            ```
+
+            Cambios en [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ env.TAG }}/CHANGELOG.md).

@@ -1,0 +1,9 @@
+# Normalización de fin de línea: el instalador se ejecuta en hosts Linux.
+# Un CRLF en install-docker.sh rompe el shebang y el script no arranca.
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
