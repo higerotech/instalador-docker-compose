@@ -6,28 +6,61 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 y este proyecto se adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 Convención de corte por gate: Gate 0 → `0.1.0`, Gate 1 → `0.2.0`, Gate 2 → `0.3.0`,
-Gate 3 → `0.4.0`, Gate 4 → `0.5.0`, Gate 5 → `1.0.0` (primer release productivo).
+Gate 3 → `0.4.0`, Gate 4 → `0.5.0`, Gate 5 → `1.0.0`.
+
+**Esta convención dejó de aplicarse en `1.0.0`**, publicada al cerrar el Gate 2 en lugar del
+Gate 5. El motivo está razonado en la entrada de esa versión: a partir de ella manda la
+estabilidad del contrato público del instalador, no el avance por gates. Los Gates 3 a 5
+avanzan como versiones `1.x`.
 
 ## [Unreleased]
 
-Pendiente para `0.3.0` (cierre del Gate 2): verificación en host real con systemd, prueba
-negativa del fingerprint GPG, aserción sobre la bitácora, y activación de las protecciones de
-rama y tags en GitHub.
+Pendiente para el Gate 3: prueba negativa del fingerprint GPG, cobertura del resto de la matriz
+de distribuciones en host real, prueba de convergencia y verificación del aviso de UFW.
+
+## [1.0.0] - 2026-08-30
+
+Cierre del **Gate 2 — Build**, con el instalador verificado en un host real. Primer release
+estable de la herramienta.
+
+**Sobre el salto a `1.0.0`.** El corte por gate habría dado `0.3.0`. Se publica `1.0.0` como
+desviación consciente de esa convención: SemVer mayor no mide madurez de proceso sino
+**estabilidad del contrato público**, y el del instalador —14 opciones, 6 códigos de salida y
+4 rutas de fichero— está especificado en `docs/02-design/interfaces-contract.md`, congelado y
+ahora verificado en un host real. Los Gates 3 a 5 siguen abiertos y avanzarán como versiones
+`1.x`: son madurez operativa, no cambios de contrato. A partir de aquí, cualquier cambio
+incompatible de ese contrato exige `2.0.0`.
 
 ### Añadido
 
+- **Verificación en host real (Ubuntu 24.04)**, evidencia que cierra el Gate 2: instalación
+  completa sin intervención, `daemon.json` creado con el perfil de endurecimiento, daemon
+  reiniciado sin fallo, servicio activo y habilitado en el arranque, driver `json-file` con
+  rotación 10m × 3 efectiva, Docker 29.7.2 y Compose v5.5.0 operativos, smoke test `hello-world`
+  correcto y bitácora escrita.
+- Confirmado en esa ejecución que el grupo `docker` **solo** se concede con `--docker-group`
+  explícito y que la advertencia de ADR-0007 aparece en la salida (control de T5, la amenaza de
+  mayor score del modelo).
 - `docs/03-implementation/repo-history.md` regenerado desde el historial real con
   `scripts/gitgraph_from_log.py`: `gitGraph` derivado, bitácora fiel de commits y tabla de
   trazabilidad tag ↔ commit ↔ versión ↔ gate. Cierra el ítem correspondiente del Gate 2.
 - Sección de licencia en el `README.md` (GPL-3.0, heredada del commit inicial del repositorio)
   con la implicación práctica para quien redistribuya una versión modificada.
-
 - **`release.yml` admite disparo manual** (`workflow_dispatch`) con el tag como entrada:
-  `gh workflow run release.yml --ref main -f tag=v0.2.0`. Necesario porque GitHub no registra
+  `gh workflow run release.yml --ref main -f tag=vX.Y.Z`. Necesario porque GitHub no registra
   un workflow hasta que llega a la rama por defecto, de modo que un tag empujado antes nunca
   dispara su release; reescribir el tag para forzarlo violaría ADR-0002. El workflow hace
   checkout del contenido del tag sin tocarlo, y los tags de hito documental sin instalador
   terminan con aviso en lugar de fallar.
+
+### Seguridad
+
+- **Inmutabilidad de los tags impuesta por configuración**, no solo por convención: ruleset
+  `Protect-Tags` sobre `refs/tags/v*` con `deletion`, `non_fast_forward` y `update`, sin actores
+  con bypass. Es el control que faltaba para que la mitigación de T2 de ADR-0002 fuera real.
+  Verificado con pruebas no destructivas: borrado y `--force` rechazados. Documentado en
+  `docs/05-deployment/deployment.md` el coste operativo: un tag erróneo es permanente y se
+  corrige publicando el siguiente, no borrándolo.
 
 ### Corregido
 
@@ -121,6 +154,7 @@ Cierre del **Gate 0 — Requirements**.
 - Visibilidad: **repositorio público** — elimina la filtración de token en el historial del shell.
 - Distribución: **tag SemVer inmutable + checksum**, con `main` documentado solo para pruebas.
 
-[Unreleased]: https://github.com/higerotech/instalador-docker-compose/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/higerotech/instalador-docker-compose/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/higerotech/instalador-docker-compose/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/higerotech/instalador-docker-compose/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/higerotech/instalador-docker-compose/releases/tag/v0.1.0

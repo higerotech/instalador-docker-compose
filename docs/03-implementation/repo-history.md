@@ -79,10 +79,10 @@ mirando el grafo:
 |---|---|---|---|---|
 | `v0.1.0` | `465801f` | 0.1.0 | Gate 0 — Requirements | Charter, glosario, clasificación de datos, PRD DOCKER-INSTALL-001 |
 | `v0.2.0` | `f674f5f` | 0.2.0 | Gate 1 — Design | ADR-0001 … ADR-0009, threat model STRIDE/DREAD, contrato CLI, `install-docker.sh` 0.2.0 |
-| `v0.3.0` | *(pendiente)* | *(pendiente)* | Gate 2 — Build | Verificación real en host con systemd, prueba negativa del fingerprint GPG |
-| `v0.4.0` | *(pendiente)* | *(pendiente)* | Gate 3 — Testing | Cierre de las brechas de `test-strategy.md` |
-| `v0.5.0` | *(pendiente)* | *(pendiente)* | Gate 4 — Deployment | Protecciones de rama y tags, primera release publicada |
-| `v1.0.0` | *(pendiente)* | *(pendiente)* | Gate 5 — Monitoring | Inventario de flota y proceso de incidentes ensayado |
+| `v1.0.0` | *(al mergear)* | 1.0.0 | Gate 2 — Build | Verificación en host real Ubuntu 24.04; contrato CLI congelado. Sustituye al `v0.3.0` que preveía la convención — ver la entrada de `1.0.0` en el `CHANGELOG.md` |
+| `v1.1.0` | *(pendiente)* | *(pendiente)* | Gate 3 — Testing | Prueba negativa del fingerprint GPG y cierre de las brechas de `test-strategy.md` |
+| `v1.2.0` | *(pendiente)* | *(pendiente)* | Gate 4 — Deployment | CI como check obligatorio y primera release publicada por el workflow |
+| `v1.3.0` | *(pendiente)* | *(pendiente)* | Gate 5 — Monitoring | Inventario de flota y proceso de incidentes ensayado |
 
 ## Invariantes de implementación que la revisión de PR debe proteger
 

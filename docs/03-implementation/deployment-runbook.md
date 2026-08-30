@@ -28,7 +28,7 @@ Este es el flujo que se debe usar en producción. Verifica el artefacto **antes*
 root:
 
 ```bash
-V=v0.2.0
+V=v1.0.0
 B="https://github.com/higerotech/instalador-docker-compose/releases/download/$V"
 
 curl -fsSLO "$B/install-docker.sh"
@@ -48,7 +48,7 @@ persiste, avisa al mantenedor antes de seguir.
 Para hosts de laboratorio o aprovisionamiento automatizado donde ya se confía en el canal:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/higerotech/instalador-docker-compose/v0.2.0/install-docker.sh \
+curl -fsSL https://raw.githubusercontent.com/higerotech/instalador-docker-compose/v1.0.0/install-docker.sh \
   | sudo bash -s -- --docker-group "$USER"
 ```
 

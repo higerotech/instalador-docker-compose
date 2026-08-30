@@ -18,8 +18,9 @@ Detalle en `docs/05-deployment/deployment.md`.
 
 ## Controles de repositorio (bloqueantes para ADR-0002)
 
-- [ ] **Protección de rama `main`**: sin push directo, PR obligatorio, CI en verde requerido
-- [ ] **Protección de tags `v*`**: no reescribibles ni borrables
+- [x] **Protección de rama `main`**: ruleset `Protect-Main` activo (`deletion`, `non_fast_forward`, `pull_request`). Verificado: el push directo a `main` fue rechazado con `GH013`
+- [x] **Protección de tags `v*`**: ruleset `Protect-Tags` activo (`deletion`, `non_fast_forward`, `update`) sobre `refs/tags/v*`, sin actores con bypass. Verificado con dos pruebas no destructivas: borrado rechazado con *Cannot delete this tag* y `--force` rechazado con *Cannot update this protected ref*
+- [ ] CI en verde requerido como check obligatorio para mergear (hoy el ruleset exige PR pero no exige que el CI pase)
 - [ ] Revisión obligatoria de PR antes de merge
 
 > Sin estos tres controles, la mitigación de T1 y T2 que sostiene ADR-0002 no existe: un tag
@@ -34,5 +35,5 @@ Detalle en `docs/05-deployment/deployment.md`.
 - [ ] `<TODO>` Definir quién aprueba la ola 3 (hosts críticos)
 
 **Estado Gate 4: ABIERTO** — el diseño del pipeline y la estrategia de release están completos;
-faltan la primera ejecución real del workflow y, sobre todo, activar las protecciones de rama y
-tags en GitHub.
+las protecciones de rama y tags ya están activas y verificadas; falta la primera ejecución real
+del workflow de release y exigir el CI como check obligatorio para mergear.
