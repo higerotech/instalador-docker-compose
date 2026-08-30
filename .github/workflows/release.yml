@@ -1,0 +1,73 @@
+name: Release
+
+# Publica el artefacto inmutable del instalador al empujar un tag SemVer (ADR-0002).
+# El SHA256SUMS publicado es el ancla de integridad que el operador puede verificar
+# antes de ejecutar el script como root.
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publicar release verificable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ShellCheck (puerta previa a publicar)
+        run: shellcheck install-docker.sh
+
+      - name: La versión del script debe coincidir con el tag
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME#v}"
+          SCRIPT_VERSION="$(bash install-docker.sh --version | awk '{print $2}')"
+          echo "tag=${TAG} script=${SCRIPT_VERSION}"
+          if [ "$TAG" != "$SCRIPT_VERSION" ]; then
+            echo "::error::El tag ${GITHUB_REF_NAME} no coincide con SCRIPT_VERSION=${SCRIPT_VERSION} en install-docker.sh"
+            exit 1
+          fi
+
+      - name: El CHANGELOG debe tener una entrada para la versión
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME#v}"
+          grep -q "^## \[${TAG}\]" CHANGELOG.md || {
+            echo "::error::Falta la sección [## ${TAG}] en CHANGELOG.md"
+            exit 1
+          }
+
+      - name: Generar SHA256SUMS
+        run: |
+          set -euo pipefail
+          sha256sum install-docker.sh > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Publicar release con el artefacto y su checksum
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            install-docker.sh
+            SHA256SUMS
+          body: |
+            Instalador gobernado de Docker Engine + Compose — `${{ github.ref_name }}`
+
+            **Instalación verificada (recomendada):**
+            ```bash
+            V=${{ github.ref_name }}
+            B=https://github.com/${{ github.repository }}/releases/download/$V
+            curl -fsSLO "$B/install-docker.sh" && curl -fsSLO "$B/SHA256SUMS"
+            sha256sum -c SHA256SUMS && sudo bash install-docker.sh
+            ```
+
+            **Instalación directa (tag inmutable):**
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/install-docker.sh | sudo bash
+            ```
+
+            Cambios en [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md).
