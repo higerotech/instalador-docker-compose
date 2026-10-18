@@ -13,7 +13,7 @@ Detalle en `docs/05-deployment/deployment.md`.
 - [x] Los tags de hito documental sin instalador terminan con aviso, no con fallo
 - [x] Diagrama C4 Deployment de la topología completa
 - [x] Ruta de reversión documentada, con la lista explícita de lo que **no** es reversible
-- [ ] Workflow `release.yml` ejecutado con éxito al menos una vez
+- [x] Workflow `release.yml` ejecutado con éxito al menos una vez — `v1.0.0`, disparado por el push del tag el 2026-08-30
 - [ ] `SHA256SUMS` verificado manualmente por alguien distinto de quien publicó
 
 ## Controles de repositorio (bloqueantes para ADR-0002)

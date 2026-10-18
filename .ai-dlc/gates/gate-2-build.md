@@ -25,11 +25,12 @@ instalación completa sin intervención.
 - [x] `docker compose version` operativo (Docker 29.7.2, Compose v5.5.0)
 - [x] Smoke test `hello-world` ejecutado correctamente
 - [x] Grupo `docker` concedido **solo por `--docker-group` explícito**, con la advertencia de ADR-0007 visible en la salida (T5)
-- [x] Bitácora escrita en `/var/log/instalador-docker-compose.log`
+- [x] Bitácora escrita en `/var/log/instalador-docker-compose.log`, con el formato que especifica el contrato de interfaces (UTC ISO 8601 + nivel entre corchetes)
+- [x] **Verificación real del fingerprint GPG (RS01 / T3)** — el control de cadena de suministro ejercido en un host real, no simulado. Línea de la bitácora:
+      `2026-08-30T21:50:24Z [INFO] Fingerprint verificado: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88 (Docker Release CE deb).`
+      Contrastado el 2026-08-30 contra la constante `DOCKER_GPG_FPR` de `v1.0.0` y contra la llave viva de `download.docker.com`: los tres coinciden
 - [ ] Instalación real verificada en **Debian 12** y **Debian 13**
 - [ ] Instalación real verificada en **Ubuntu 22.04**
-- [ ] **Verificación real del fingerprint GPG**: confirmar en la bitácora la línea `Fingerprint verificado` (se omite en `--dry-run`, y quedó fuera de la captura). Comprobar con:
-      `sudo grep -i fingerprint /var/log/instalador-docker-compose.log`
 - [ ] Prueba de convergencia: segunda ejecución sobre el host ya instalado no reinstala y respeta la configuración existente
 - [ ] Aviso de UFW verificado en un host con UFW activo (T6, score 8.2)
 - [ ] **Prueba negativa de integridad**: servir una llave que no coincida y confirmar salida con código 4 y host intacto → **diferida al Gate 3**, requiere montar un origen falso
@@ -57,5 +58,6 @@ Se difieren al Gate 3, con decisión humana explícita y sin bloquear este gate:
 - La cobertura del resto de la matriz de distribuciones (Debian 12/13, Ubuntu 22.04) en host real.
 - La prueba de convergencia y la del aviso de UFW.
 
-Queda pendiente de confirmación puntual la línea `Fingerprint verificado` en la bitácora del
-host, que quedó fuera de la captura de la ejecución.
+**Sin reservas pendientes.** La línea `Fingerprint verificado` de la bitácora del host quedó
+confirmada el 2026-08-30, con lo que el único control de seguridad que seguía sin evidencia de
+ejecución real —la verificación de la llave GPG, RS01/T3— pasa a estar demostrado en producción.

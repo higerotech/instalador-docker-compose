@@ -212,8 +212,12 @@ manifiestan de inmediato, sino tras acumular actividad.*
 - [ ] **Protección de rama `main` activada** en GitHub (sin push directo, PR obligatorio).
       Sin esto, ADR-0002 no se sostiene.
 - [ ] **Protección de tags `v*`** activada (no se pueden reescribir ni borrar).
-- [ ] Workflow `release.yml` ejecutado con éxito al menos una vez.
-- [ ] `SHA256SUMS` publicado y verificado manualmente por un operador distinto del que publicó.
+- [x] Workflow `release.yml` ejecutado con éxito al menos una vez — `v1.0.0`, 2026-08-30.
+- [x] Cadena artefacto ↔ tag ↔ checksum verificada end-to-end: el `install-docker.sh` publicado,
+      el servido por `raw` y el contenido del tag tienen el mismo `sha256`
+      (`fb052518…888bbe`), y `sha256sum -c SHA256SUMS` valida.
+- [ ] `SHA256SUMS` verificado por **un operador distinto** del que publicó (la verificación
+      anterior la hizo quien publicó; falta el segundo par de ojos).
 - [x] Disparo manual (`workflow_dispatch`) disponible para publicar un tag existente sin
       reescribirlo, y salida limpia en tags de hito documental sin instalador.
 - [ ] Runbook validado ejecutándolo paso a paso en un host real.
