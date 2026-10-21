@@ -5,7 +5,11 @@
 #   1. ShellCheck sobre el instalador y los tests.
 #   2. Matriz dry-run en Debian 12/13 y Ubuntu 22.04/24.04 + distro no soportada.
 #   3. Pruebas de fusión de daemon.json en contenedor desechable.
-#   4. Validación de los diagramas Mermaid de docs/.
+#   4. Integridad GPG: prueba negativa con origen suplantado, y rollback.
+#   5. Instalación real, convergencia, bitácora, pin de versión y aviso de UFW.
+#   6. Validación de los diagramas Mermaid de docs/.
+#
+# Las etapas 4 y 5 descargan paquetes reales: son las lentas.
 #
 # Uso: bash tests/run-all.sh
 #===============================================================================
@@ -49,7 +53,22 @@ stage_shellcheck() {
     # Versión fijada: la de ubuntu-latest difiere y emite códigos distintos para el mismo
     # hallazgo, lo que produce verde en local y rojo en CI. CI usa esta misma imagen.
     docker run --rm -v "${MOUNT_SRC}:/work" -w /work "koalaman/shellcheck:${SHELLCHECK_VERSION}" \
-        install-docker.sh tests/dry-run-matrix.sh tests/hardening-merge.sh tests/run-all.sh
+        install-docker.sh tests/dry-run-matrix.sh tests/hardening-merge.sh \
+        tests/gpg-integrity.sh tests/install-real.sh tests/run-all.sh
+}
+
+stage_gpg_integrity() {
+    # Prueba negativa del control de cadena de suministro: levanta un origen HTTPS
+    # que suplanta a download.docker.com. Necesita contenedor desechable.
+    docker run --rm -v "${MOUNT_SRC}:/work" -w /work debian:12 \
+        bash tests/gpg-integrity.sh
+}
+
+stage_install_real() {
+    # Instalación real de paquetes, convergencia, bitácora, pin y aviso de UFW.
+    # Es la etapa más lenta: descarga Docker de verdad.
+    docker run --rm -v "${MOUNT_SRC}:/work" -w /work debian:12 \
+        bash tests/install-real.sh
 }
 
 stage_dry_run() { bash tests/dry-run-matrix.sh; }
@@ -72,6 +91,8 @@ command -v docker >/dev/null 2>&1 || { echo "Docker es necesario para la suite."
 run_stage "ShellCheck" stage_shellcheck
 run_stage "Matriz dry-run" stage_dry_run
 run_stage "Fusión daemon.json" stage_hardening
+run_stage "Integridad GPG (negativa + rollback)" stage_gpg_integrity
+run_stage "Instalación real y convergencia" stage_install_real
 run_stage "Diagramas Mermaid" stage_mermaid
 
 echo

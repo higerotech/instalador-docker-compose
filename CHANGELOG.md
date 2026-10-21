@@ -15,8 +15,46 @@ avanzan como versiones `1.x`.
 
 ## [Unreleased]
 
-Pendiente para el Gate 3: prueba negativa del fingerprint GPG, cobertura del resto de la matriz
-de distribuciones en host real, prueba de convergencia y verificación del aviso de UFW.
+Pendiente para el Gate 3: cobertura de la matriz completa de distribuciones en host real con
+systemd, y `--userns-remap` antes de promoverlo de experimental a estable.
+
+## [1.0.1] - 2026-08-30
+
+Corrección de seguridad encontrada por las pruebas del Gate 3, más la suite que la encontró.
+
+### Corregido
+
+- **El rollback del estado de APT no funcionaba.** `install-docker.sh` declaraba
+  `set -euo pipefail` sin la `E`, y bash **no hereda la trampa `ERR` dentro de funciones** salvo
+  con `-E` (`errtrace`). Como todo el cuerpo del script vive en funciones por diseño (ADR-0008),
+  `on_error` nunca llegaba a ejecutarse: ante un fallo el script salía por `errexit` **sin
+  revertir nada**, dejando un `docker.sources` inválido que inutiliza `apt-get` en el host y
+  bloquea sus actualizaciones de seguridad.
+
+  Es exactamente la amenaza **T10**, que el threat model daba por mitigada y ADR-0008 describía
+  como control implementado. Lo estaba en el código y no en la práctica: el camino de fallo no
+  se había ejercido nunca. El propio ADR-0008 anticipaba esta clase de fragilidad.
+
+  La corrección es un carácter —`set -eEuo pipefail`— y va acompañada de la prueba de regresión
+  que la detectó (`tests/gpg-integrity.sh`, prueba 2), que comprueba que tras un fallo el
+  repositorio y el keyring se retiran y `apt-get update` del host sigue funcionando.
+
+### Añadido
+
+- **`tests/gpg-integrity.sh` — prueba negativa del control de cadena de suministro (RS01/T3).**
+  Levanta un origen HTTPS local con CA propia que suplanta a `download.docker.com` dentro del
+  contenedor, reproduciendo la amenaza T3 real: un atacante capaz de presentar un certificado
+  válido para ese dominio. Verifica que el instalador **rechaza** una llave de atacante bien
+  formada con código 4, no instala el keyring, no configura el repositorio y deja constancia en
+  la bitácora. Incluye la prueba positiva y la de rollback. 15 aserciones.
+- **`tests/install-real.sh` — instalación real de paquetes y convergencia.** 38 aserciones:
+  pin de versión inexistente, instalación completa desde el repositorio oficial, estado que
+  deja en el host, formato de la bitácora, convergencia con y sin `python3`, preservación de la
+  configuración del operador y aviso del bypass de UFW con un doble de prueba.
+- Cobertura de la **ruta degradada sin `python3`**, que no estaba probada: con un `daemon.json`
+  existente y sin `python3`, el instalador conserva el fichero intacto y avisa, en lugar de
+  escribir a ciegas.
+- CI: dos tareas nuevas (`gpg-integrity` e `install-real`), siete en total.
 
 ### Seguridad
 
@@ -171,7 +209,8 @@ Cierre del **Gate 0 — Requirements**.
 - Visibilidad: **repositorio público** — elimina la filtración de token en el historial del shell.
 - Distribución: **tag SemVer inmutable + checksum**, con `main` documentado solo para pruebas.
 
-[Unreleased]: https://github.com/higerotech/instalador-docker-compose/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/higerotech/instalador-docker-compose/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/higerotech/instalador-docker-compose/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/higerotech/instalador-docker-compose/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/higerotech/instalador-docker-compose/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/higerotech/instalador-docker-compose/releases/tag/v0.1.0

@@ -63,7 +63,7 @@ Opciones completas: `bash install-docker.sh --help` y
 | 0 | Requirements | ✅ cerrado (0.1.0) |
 | 1 | Design | ✅ cerrado (0.2.0) |
 | 2 | Build / despliegue real | ✅ cerrado (1.0.0) — instalación verificada en un host Ubuntu 24.04 real |
-| 3 | Testing | 🚧 abierto — falta la prueba negativa del fingerprint GPG |
+| 3 | Testing | 🚧 abierto — falta systemd y la matriz completa en host real |
 | 4 | Deployment | 🚧 abierto — protecciones de rama y tags activas; falta exigir el CI como check obligatorio |
 | 5 | Monitoring | 🚧 abierto — sin inventario de flota |
 
@@ -86,7 +86,11 @@ docs/
   06-monitoring/        observabilidad, SLOs y respuesta a incidentes
   architecture/         índice de todos los diagramas por eje y fase
 scripts/                validate_mermaid.py, gitgraph_from_log.py
-tests/                  suite: matriz en contenedores + fusión de daemon.json
+tests/                  suite de 108 aserciones:
+                          dry-run-matrix.sh   4 distribuciones + no soportada
+                          hardening-merge.sh  fusión de daemon.json
+                          gpg-integrity.sh    origen suplantado, rechazo y rollback
+                          install-real.sh     instalación real, convergencia, bitácora, UFW
 ```
 
 ## Pruebas
@@ -95,8 +99,9 @@ tests/                  suite: matriz en contenedores + fusión de daemon.json
 bash tests/run-all.sh      # ShellCheck + matriz + fusión + Mermaid (requiere Docker)
 ```
 
-Estado en la última ejecución (2026-08-30): **ShellCheck sin hallazgos · 41/41 en la matriz de
-contenedores · 14/14 en las pruebas de fusión · 25/25 diagramas válidos**.
+Estado en la última ejecución (2026-08-30): **108 aserciones, todas en verde** — ShellCheck sin
+hallazgos · 41/41 en la matriz de contenedores · 14/14 en fusión de `daemon.json` · 15/15 en
+integridad GPG · 38/38 en instalación real · 25/25 diagramas válidos.
 
 A esto se suma la **verificación en host real** que cierra el Gate 2: instalación completa en
 Ubuntu 24.04 con systemd, `daemon.json` endurecido, servicio activo, rotación de logs efectiva

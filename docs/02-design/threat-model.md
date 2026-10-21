@@ -152,15 +152,34 @@ automatizada. Ninguna queda solo documentada.
 | Amenaza | Control | Dónde vive | Prueba que lo verifica |
 |---|---|---|---|
 | T5 | Grupo `docker` opt-in | `manage_docker_group` | `dry-run-matrix.sh`: "el grupo docker es opt-in explícito" |
-| T6 | Aviso de bypass de UFW | `firewall_advisory` | Verificación manual en Gate 2 (requiere UFW activo) |
+| T6 | Aviso de bypass de UFW | `firewall_advisory` | `install-real.sh` (prueba 4): con UFW activo avisa y ofrece la mitigación; sin UFW no avisa |
 | T1 / T2 | Tag inmutable + checksum | `release.yml`, README | `release.yml`: el tag debe coincidir con `SCRIPT_VERSION` |
 | T7 | Rotación de logs por defecto | `print_hardening_profile` | `hardening-merge.sh`: "aplica la rotación de logs" |
 | T8 | Fusión no destructiva + backup | `apply_hardening` | `hardening-merge.sh`: 6 aserciones, incluida la de JSON corrupto |
 | T4 | `main "$@"` al final | Estructura del fichero | Revisión en PR + `bash -n`; ShellCheck en CI |
-| T10 | Rollback del estado APT | `on_error`, `rollback_apt_state` | `dry-run-matrix.sh`: distro no soportada devuelve exit 3 sin tocar el host |
-| T3 | Pin de fingerprint | `install_gpg_key` | **Verificado en host real (2026-08-30)**: la bitácora registra `Fingerprint verificado: 9DC8…CD88`, coincidente con el pin y con la llave viva. Falta la prueba negativa (Gate 3) |
-| T9 | Pin de versión | `resolve_version_string` | `<TODO>` prueba de pin en Gate 3 |
-| T11 | Bitácora | `_log_line` | Formato evidenciado en host real (UTC ISO 8601 + nivel). Falta la aserción automatizada (Gate 3) |
+| T10 | Rollback del estado APT | `on_error`, `rollback_apt_state` | `gpg-integrity.sh` (prueba 2): tras un fallo real se retiran repositorio y keyring y `apt-get update` del host sigue funcionando. **Este control estuvo roto hasta 1.0.1** — ver nota abajo |
+| T3 | Pin de fingerprint | `install_gpg_key` | **Verificado en los dos sentidos**: acepta la llave legítima (host real, 2026-08-30) y **rechaza** una llave de atacante con código 4 (`gpg-integrity.sh`, prueba 1, con origen HTTPS suplantado) |
+| T9 | Pin de versión | `resolve_version_string` | `install-real.sh` (prueba 1): una versión inexistente no se instala y se listan las disponibles |
+| T11 | Bitácora | `_log_line` | `install-real.sh`: START con formato del contrato, fingerprint verificado, argumentos y END |
+
+### Nota de corrección: T10 estuvo mitigado solo sobre el papel (hasta 1.0.1)
+
+Este documento afirmó desde el Gate 1 que T10 estaba mitigado por el `trap ERR` →
+`rollback_apt_state`. **La afirmación era falsa en la práctica**, y conviene que quede escrito.
+
+El script declaraba `set -euo pipefail` sin la `E`. Bash **no hereda la trampa `ERR` dentro de
+funciones** salvo con `-E` (`errtrace`), y como todo el cuerpo vive en funciones por diseño
+(ADR-0008), `on_error` jamás se ejecutaba. Ante un fallo el script salía por `errexit` sin
+revertir nada, dejando el `docker.sources` inválido que T10 describe.
+
+Por qué no se detectó antes: **el camino de fallo nunca se había ejercido**. Todas las pruebas
+anteriores recorrían el camino feliz o abortaban en el preflight (códigos 2 y 3), que salen con
+`exit` y no pasan por la trampa. Hizo falta una prueba que provocara un fallo *después* de
+escribir en el host —la prueba 2 de `gpg-integrity.sh`— para que el defecto apareciera.
+
+Lección para el resto del modelo: **un control cuya ruta no se ejercita no es un control, es una
+intención**. Los controles que hoy siguen sin ruta de fallo probada quedan listados como brechas
+en `docs/04-testing/test-strategy.md`, no marcados como mitigados.
 
 ### Riesgos aceptados de forma explícita
 
